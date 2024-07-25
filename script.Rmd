@@ -362,7 +362,7 @@ plot_grid(m2_npp.plt,m2_poc.plt,
 ggsave("img/Fig.1_biomas-plots-SLR.png", width=25, height=20, units="cm", dpi=300)
 ```
 
-```{r FigS2,fig.height=8, fig.width=9}
+```{r FigS6,fig.height=8, fig.width=9}
 ### 2.2 Model Diagnostics
 # Combine the top and bottom rows with a spacer in between
 plot_grid(resid_panel(model2_npp), NULL, resid_panel(model2_poc),
@@ -371,7 +371,7 @@ plot_grid(resid_panel(model2_npp), NULL, resid_panel(model2_poc),
                         ncol = 3,   labels = c("A","","B","","","","C","","E"), 
           label_size = 12, rel_widths = c(1, 0.15, 1),rel_heights = c(1, 0.15, 1))
 
-ggsave("img/Fig.S2_biomas-plots-ModelDiag.png", width=9, height=9, units="in", dpi=300)
+ggsave("img/Fig.S6_biomas-plots-ModelDiag.png", width=9, height=9, units="in", dpi=300)
 ```
 
 ```{r}
@@ -467,7 +467,7 @@ rm(model2_npp, model2_poc,model3_npp,model3_poc)
 ## 3. ENV variable coverage
 
 
-```{r FigS1, fig.height=8, fig.width=8, warning=FALSE}
+```{r FigS4, fig.height=8, fig.width=8, warning=FALSE}
 ### ENV Maps
 npp_map<-plot.map(npp.clim[,c("longitude","latitude","npp")] |> mutate(npp=npp/1000))+
   labs(color=TeX(r'(\textbf{NPP $(mg C \cdot m^{-2} \cdot day^{-1})$})'),)+
@@ -489,10 +489,10 @@ poc_map<-plot.map(poc.clim[,c("longitude","latitude","POC")])+
                           nbin = 10))
 
 plot_grid(npp_map,poc_map,labels = "AUTO", label_size = 12, align = "h",hjust = -5, ncol= 1)
-ggsave("img/Fig.S1_biomas-plots-POC-NPP.png", width=8, height=8, units="in", dpi=300)
+ggsave("img/Fig.S4_biomas-plots-POC-NPP.png", width=8, height=8, units="in", dpi=300)
 ```
 
-```{r FigS3,fig.height=4, fig.width=10, message=FALSE, warning=FALSE}
+```{r FigS5,fig.height=4, fig.width=10, message=FALSE, warning=FALSE}
 ### Density Polts
 ## DENSITY NPP AND POC---------------------------------------------------
 den.npp<- ggplot(npp.clim) +
@@ -517,7 +517,7 @@ den.npp + theme(legend.position="none")+
   den.poc+ 
   plot_layout(widths = 1) +  plot_annotation(tag_levels = 'A') & 
   theme(plot.tag = element_text("Times New Roman",face = "bold", size = 12,hjust = -3, vjust = 0))
-ggsave("img/Fig.S3_biomas-plots-ENV-DensityPlots.png", width=25, height=20, units="cm", dpi=300)
+ggsave("img/Fig.S5_biomas-plots-ENV-DensityPlots.png", width=25, height=20, units="cm", dpi=300)
 ```
 
 ```{r}
@@ -686,9 +686,31 @@ ggsave("img/Fig.2_biomas-plots-climatology.png", width=22, height=10, units="in"
 rm(max.sp_lat,tot_rar,avr_rar,sp)
 ```
 
-```{r FigS4,fig.height=4, fig.width=10, warning=FALSE}
+```{r FigS1,fig.height=8, fig.width=10, warning=FALSE}
+library(ggnewscale)
+mesopel_labels_prov <- read_csv("data/mesopel_labels_prov.csv")
+# Create an sf object from the data frame
+sf_object <- st_as_sf(mesopel_labels_prov, coords = c("longitude", "latitude"), crs = 4326)
+# Transform the coordinates to the desired CRS
+transformed_sf <- st_transform(sf_object, crs = PROJ)
+# Extract the transformed coordinates and convert them to a data frame
+mesopel_labels.prj <- as.data.frame(st_coordinates(transformed_sf))
+# Rename the columns
+names(mesopel_labels.prj )[1:2] <- c("X.prj", "Y.prj")
+# transform to data.table (easier to work with)
+mesopel_labels_prov <- data.table(mesopel_labels.prj,mesopel_labels_prov) |> select(-longitude, -latitude)
+
+
+mes.prov_plt<-plot.map(grid |> drop_na(ProvId)|> mutate(ProvId=factor(ProvId)) |> select(longitude,latitude,ProvId), continious=FALSE, alpha=0.6)+
+  scale_color_manual(values=c("#211674","#6e4e07","#d2c59c","#857346","#a2863f","#c0985e","#520077","#9e4b68","#fdbbe9","#e100ac","#a10013","#f58083","#d30b28","#e2e1e1","#b2b2b1","#828282","#4f4f4f","#85f8c6","#4c8d6e","#a1dabf","#3341a8","#4947e6","#52c2fb","#8cd3ff","#3681ab","#c3d0fe","#a5ff00","#a5ff00","#a5d365","#6f8c43","#eabafe","#ca90ff","#ca00ff"))+ 
+  new_scale_color() +
+  geom_text(data = mesopel_labels_prov,
+            aes(X.prj, Y.prj, label = ProvId, color = color),
+            size = 2.5) + theme(legend.position = "none") +
+  scale_color_manual(values = c("black", "white"))
+
 ## Biomass per Province
-diver_biom|> 
+biom_prov<- diver_biom|> 
  select(ProvId, m2_poc, basin) |>
   drop_na() |>
   group_by(ProvId, basin) %>%
@@ -706,7 +728,12 @@ diver_biom|>
   geom_hline(yintercept = mean(diver_biom$m2_poc, na.rm=TRUE),
              linetype="dashed")
 
-ggsave("img/Fig.S4_biomas-plots-ProvId_Biomass.png", width=10, height=4, units="in", dpi=300)
+(mes.prov_plt / biom_prov) + 
+  plot_layout(heights = c(1.5,1)) +  
+  plot_annotation(tag_levels = c('A',"B")) & 
+  theme(plot.tag = element_text("Times New Roman",face = "bold", size = 12))
+
+ggsave("img/Fig.S1_biomas-plots-ProvId_Biomass.png", width=10, height=8, units="in", dpi=300)
 
 ```
 
@@ -862,7 +889,7 @@ ggsave("img/Fig.5_biomas-plots-DiversityBiomass.png", width=10, height=15, units
 
 # 7. Cluster Bio+SR
 
-```{r FigS8,  warning=FALSE}
+```{r FigS7,  warning=FALSE}
 library(factoextra)
 
 # Loading dataset
@@ -880,7 +907,7 @@ fviz_cluster(km10, data = df1,labelsize = 0)+
   theme_Publication()+
   labs(x="Biomass (log10)", y="SR")
 
-ggsave("img/Fig.8_clusters_plot.png", width=5, height=5, units="in", dpi=300)
+ggsave("img/Fig.7_clusters_plot.png", width=5, height=5, units="in", dpi=300)
 ```
 
 
@@ -944,7 +971,7 @@ ggsave("img/Fig.7_clusters_Proud_vs_ThisWork.png", width=10, height=3, units="in
 
 ## Mediterenian Sea
 
-```{r FigS9,fig.height=5, fig.width=10, warning=FALSE}
+```{r FigS3,fig.height=5, fig.width=10, warning=FALSE}
 library(maps)
 library(metR)
 mediter<- diver_biom |>  filter(longitude <80, longitude >-5, latitude >25,latitude<44)
@@ -963,7 +990,7 @@ medi.plt<- ggplot(world_map, aes(x = long, y = lat, group = group)) +
   scale_y_latitude(ticks = 5)+
   labs(fill = TeX(r'($log_{10}Bio$)'),x="",y="") 
 medi.plt
-ggsave("img/Fig.S9_biomas-plots-mediterenian.png", width=18, height=7, units="cm", dpi=300)
+ggsave("img/Fig.S3_biomas-plots-mediterenian.png", width=18, height=7, units="cm", dpi=300)
 ```
 
 ## Stromberg et al (2009)
@@ -1044,7 +1071,7 @@ psych::describe(obrien.dt$ratio_epi_meso,quant=c(.25,.75) )
 ## Bogorov et al (1968)
 
 Bogorov, V.G., Vinogradov, M.D., Varonina, N.M., Kanaeva, I.P., and Suetova, I.A. 1968. Distribution of zooplankton biomass within the surficial layer of the world ocean. Dokl. Akad. Nauk. USSR, 182: 1205-1207
-```{r FigS5,fig.height=4, fig.width=8}
+```{r FigS2,fig.height=4, fig.width=8}
 # Bogorov, V.G., Vinogradov, M.D., Varonina, N.M., Kanaeva, I.P., and Suetova, I.A. 1968. Distribution of zooplankton biomass within the surficial layer of the world ocean. Dokl. Akad. Nauk. USSR, 182: 1205-1207
 nc <-   st_read(here::here("shp/V3_BIOMAS_VALUE_SHAPFILE/BIOMAS_VALUE.shp")) |>
   filter(bio_mg_m3 !="boundary line") |> 
@@ -1057,7 +1084,8 @@ bogov.map <- ggplot(nc, aes(fill = bio_mg_m3)) +
   scale_fill_brewer(type = "qual")
 bogov.map
 
-ggsave("img/Fig.S5_map-Bogrov.png", width=29.7, height=14, units="cm", dpi=300)
+
+ggsave("img/Fig.S2_map-Bogrov.png", width=29.7, height=14, units="cm", dpi=300)
 ```
 ```{r fig.height=10, fig.width=8}
 shp <- raster::shapefile("shp/V3_BIOMAS_VALUE_SHAPFILE/BIOMAS_VALUE.shp")
@@ -1171,60 +1199,7 @@ quantile(ratios, probs = seq(0, 1, 1/20))
 ```
 
 
-## FAO Map
 
-```{r FigS6}
-# FAO. 1972. Atlas of the Living Resources of the Seas. Department of Fisheries, Food and Agriculture Organization of the United Nations, Rome.
-nc <-   st_read(here::here("shp/Zookplankton_FAO-1972_WGS84/Zookplankton_FAO-1972_WGS84.shp")) |>
-  mutate(bio_mg_m3=factor(Abundance, levels=c("<50","51-200","201-500",">500")))  |>
-  st_transform(PROJ)
-
-fao.map<- ggplot(nc, aes(fill = bio_mg_m3)) +
-  theme_minimal() +
-  geom_sf() +
-  scale_fill_brewer(type = "qual") 
-fao.map
-ggsave("img/Fig.S6_map-FAO.png", width=29.7, height=14, units="cm", dpi=300)
-```
-```{r FigS7}
-shp <- raster::shapefile("shp/Zookplankton_FAO-1972_WGS84/Zookplankton_FAO-1972_WGS84.shp")
-shp <- spTransform(shp, CRS('+proj=longlat +datum=WGS84'))
-## Set up a raster "template" for a 1 degree grid
-ext <- extent(shp)
-gridsize <- 1
-r <- raster(ext, res=gridsize)
-
-## Rasterize the shapefile
-rr <- rasterize(shp, r)
-##plot(rr)
-
-df.fao<-cbind(coordinates(rr),as.data.frame(rr)) 
-
-# put all the coordinates on a grid
-closest_RANN <- RANN::nn2(query  = df.fao[, 1:2], 
-                          data = grid[, 1:2],
-                          k = 1)
-fao.gridded <- cbind(df.fao, grid[closest_RANN$nn.idx,1:2 ]) |> 
-  select(-x, -y) |> 
-  mutate(bio=Abundance,
-         Abundance_num=case_when(
-    Abundance=="<50" ~25,
-    Abundance=="51-200" ~(51+200)/2,
-    Abundance=="201-500" ~(201+500)/2,
-    Abundance==">500" ~500
-  )) |> 
-  mutate(bio=factor(bio,levels=c("<50","51-200","201-500",">500")))
-
-right_join(diver_biom |> select(latitude, longitude, m2_poc),
-                   fao.gridded |> select(latitude, longitude, bio),
-                   by = c("longitude", "latitude")) |> 
-  drop_na(m2_poc, bio) |> 
-  select(longitude, latitude,total=bio,sum=m2_poc)   |> 
-  plot.map2D(dim=4,  ylab = "meso", xlab = "epi",pal= "BlueYl")
-
-
-ggsave("img/Fig.S7_map-FAOBio-2D.png", width=29.7, height=14, units="cm", dpi=300)
-```
 
 
 
