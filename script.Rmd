@@ -41,9 +41,12 @@ count=dplyr::count
 drop_na=tidyr::drop_na
 group_by=dplyr::group_by
 mutate=dplyr::mutate
+
+source("fun/theme_Publication.R")
 ```
 ```{r include=FALSE}
-extrafont::loadfonts(device = "win")
+extrafont::font_import(prompt = FALSE)
+extrafont::loadfonts(device = "pdf")
 ```
 # load functions
 
@@ -94,7 +97,7 @@ plt<- ggplot() +
   # __ Set empty theme
   theme_void(base_size=12, base_family="Times New Roman") + # remove the default background, gridlines & default gray color around legend's symbols
   # final theme tweaks
-  theme(legend.title = element_text(colour="black", size=10, face="bold",angle = 90), # adjust legend title
+  theme(legend.title = element_text(colour="black", size=14, face="bold",angle = 90), # adjust legend title
         legend.title.align = 0.5,
         legend.direction = "vertical",
         legend.margin=margin(0,0,0,0),
@@ -206,7 +209,7 @@ map<- ggplot() +
   coord_fixed(ratio = 1) +
   theme_void() + # remove the default background, gridlines & default gray color around legend's symbols
   # final theme tweaks
-  theme(legend.title = element_text(colour="black", size=10, face="bold",angle = 90), # adjust legend title
+  theme(legend.title = element_text(colour="black", size=14, face="bold",angle = 90), # adjust legend title
         legend.title.align = 0.5,
         legend.direction = "vertical",
         legend.margin=margin(0,0,0,0),
@@ -219,7 +222,7 @@ legend <- bi_legend(pal = pal,
                     dim = dim,
                     xlab = xlab,
                     ylab = ylab,
-                    size = 8)+
+                    size = 12)+
   theme(
     plot.background = element_blank(),
     panel.grid.major = element_blank(),
@@ -230,7 +233,7 @@ legend <- bi_legend(pal = pal,
 # combine map with legend
 ggdraw() +
   draw_plot(map, 0, 0, 1, 1) +
-  draw_plot(legend, 0.76, .74, 0.3, 0.3)
+  draw_plot(legend, 0.7, .74, 0.4, 0.4)
 
 }
 ```
@@ -305,8 +308,11 @@ SR_Biom_tot <- SR_Biom |> select(tot_rar, m2_poc, SR) |>
 
 # 2. Models
 
-
-```{r Fig1,fig.height=8, fig.width=12, warning=FALSE}
+```{r}
+text_size=14
+title_size=16
+```
+```{r Fig1+,fig.height=8, fig.width=12, warning=FALSE}
 ## 2.1 SLR plots"#4575b4","#74add1","#abd9e9",
 m2_npp.plt<- m2_npp |> ggplot(aes(y=bio,x=npp/10^3))+
   geom_point() +
@@ -318,7 +324,9 @@ m2_npp.plt<- m2_npp |> ggplot(aes(y=bio,x=npp/10^3))+
   labs(x=TeX(r'(\textbf{NPP $(g C \cdot m^{-2} \cdot day^{-1})$})'),
        y=TeX(r'(\textbf{Mesopelagic Zoop C $(g \cdot m^{-2})$})'),
        title="NPP Estimates")+
-  theme_Publication()
+  theme_Publication()+
+  theme( plot.title = element_text(size = title_size),
+         text = element_text(size = text_size))
 
 m3_npp.plt<-m3_npp |> 
   ggplot(aes(y = bio, x = npp / 10 ^ 3)) +
@@ -330,7 +338,9 @@ m3_npp.plt<-m3_npp |>
   scale_y_log10()+
   labs(x=TeX(r'(\textbf{NPP $(g C \cdot m^{-2} \cdot day^{-1})$})'),
       y=TeX(r'(\textbf{Mesopelagic Zoop C $(g \cdot m^{-2})$})'))+
-  theme_Publication()
+  theme_Publication()+
+  theme( plot.title = element_text(size = title_size),
+         text = element_text(size = text_size))
 
 m2_poc.plt<- m2_poc |> ggplot(aes(y=bio,x=POC))+
   geom_point() +
@@ -342,7 +352,9 @@ m2_poc.plt<- m2_poc |> ggplot(aes(y=bio,x=POC))+
   labs(x=TeX(r'(\textbf{POC $(mg C \cdot m^{-3})$})'),
       y=TeX(r'(\textbf{Mesopelagic Zoop C $(g \cdot m^{-2})$})'),
        title="POC Estimates")+
-  theme_Publication()
+  theme_Publication()+
+  theme( plot.title = element_text(size = title_size),
+         text = element_text(size = text_size))
 
 m3_poc.plt<-m3_poc |> 
   ggplot(aes(y=bio,x=POC))+
@@ -354,15 +366,17 @@ m3_poc.plt<-m3_poc |>
   scale_y_log10()+
   labs(x=TeX(r'(\textbf{POC $(mg C \cdot m^{-3})$})'),
     y=TeX(r'(\textbf{Mesopelagic Zoop C $(g \cdot m^{-2})$})'))+
-  theme_Publication()
+  theme_Publication()+
+  theme( plot.title = element_text(size = title_size),
+         text = element_text(size = text_size))
 
 plot_grid(m2_npp.plt,m2_poc.plt,
           m3_npp.plt,m3_poc.plt,
-          labels = "AUTO", label_size = 12, align = "h",hjust = -5, ncol= 2)
-ggsave("img/Fig.1_biomas-plots-SLR.png", width=25, height=20, units="cm", dpi=300)
+          labels = c("A","C","B","D"), label_size = 14, align = "h",hjust = -5, ncol= 2)
+ggsave("img/Fig.1_biomas-plots-SLR.png", width=25, height=20, units="cm", dpi=600)
 ```
 
-```{r FigS6,fig.height=8, fig.width=9}
+```{r FigS7+,fig.height=8, fig.width=9}
 ### 2.2 Model Diagnostics
 # Combine the top and bottom rows with a spacer in between
 plot_grid(resid_panel(model2_npp), NULL, resid_panel(model2_poc),
@@ -371,7 +385,7 @@ plot_grid(resid_panel(model2_npp), NULL, resid_panel(model2_poc),
                         ncol = 3,   labels = c("A","","B","","","","C","","E"), 
           label_size = 12, rel_widths = c(1, 0.15, 1),rel_heights = c(1, 0.15, 1))
 
-ggsave("img/Fig.S6_biomas-plots-ModelDiag.png", width=9, height=9, units="in", dpi=300)
+ggsave("img/Fig.S7_biomas-plots-ModelDiag.png", width=9, height=9, units="in", dpi=300)
 ```
 
 ```{r}
@@ -467,7 +481,7 @@ rm(model2_npp, model2_poc,model3_npp,model3_poc)
 ## 3. ENV variable coverage
 
 
-```{r FigS4, fig.height=8, fig.width=8, warning=FALSE}
+```{r FigS5+, fig.height=8, fig.width=8, warning=FALSE}
 ### ENV Maps
 npp_map<-plot.map(npp.clim[,c("longitude","latitude","npp")] |> mutate(npp=npp/1000))+
   labs(color=TeX(r'(\textbf{NPP $(mg C \cdot m^{-2} \cdot day^{-1})$})'),)+
@@ -489,10 +503,10 @@ poc_map<-plot.map(poc.clim[,c("longitude","latitude","POC")])+
                           nbin = 10))
 
 plot_grid(npp_map,poc_map,labels = "AUTO", label_size = 12, align = "h",hjust = -5, ncol= 1)
-ggsave("img/Fig.S4_biomas-plots-POC-NPP.png", width=8, height=8, units="in", dpi=300)
+ggsave("img/Fig.S5_biomas-plots-POC-NPP.png", width=8, height=8, units="in", dpi=300)
 ```
 
-```{r FigS5,fig.height=4, fig.width=10, message=FALSE, warning=FALSE}
+```{r FigS6+,fig.height=4, fig.width=10, message=FALSE, warning=FALSE}
 ### Density Polts
 ## DENSITY NPP AND POC---------------------------------------------------
 den.npp<- ggplot(npp.clim) +
@@ -517,7 +531,7 @@ den.npp + theme(legend.position="none")+
   den.poc+ 
   plot_layout(widths = 1) +  plot_annotation(tag_levels = 'A') & 
   theme(plot.tag = element_text("Times New Roman",face = "bold", size = 12,hjust = -3, vjust = 0))
-ggsave("img/Fig.S5_biomas-plots-ENV-DensityPlots.png", width=25, height=20, units="cm", dpi=300)
+ggsave("img/Fig.S6_biomas-plots-ENV-DensityPlots.png", width=20, height=8, units="cm", dpi=300)
 ```
 
 ```{r}
@@ -548,6 +562,11 @@ rm(biom.estimates,biom.estimates_npp,biom.estimates_poc)
 ```
 
 ## 5. Global Maps
+```{r}
+limits = c(1e-4, 1e4)
+text_size=16
+title_size=18
+```
 
 
 ```{r fig.height=5, fig.width=12}
@@ -559,20 +578,27 @@ map2_npp<- plot.map(npp.clim1[,c("longitude","latitude","m2")])+
                         trans="log10",
                         breaks=trans_breaks('log10', function(x) 10^x),
                         labels=trans_format('log10', function(x) round(10^x,1)),
+                        limits=limits,
                         guide = guide_colourbar(title.position = "left",
                       barwidth=0.5,barheight=10,ticks=TRUE,
                           nbin = 10))+
-  labs(subtitle="NPP-based Variable Depth Model")
+  labs(subtitle="NPP-based Variable Depth Model")+
+  theme( plot.subtitle = element_text(size = title_size),
+         text = element_text(size = text_size))
+
 map3_npp<- plot.map(npp.clim1[,c("longitude","latitude","m3")])+
   labs(color=TeX(r'(\textbf{Zoop C $(g \cdot m^{-2})$})'))+
   scale_color_gradientn(colours = my.colors,
                         trans="log10",
                         breaks=trans_breaks('log10', function(x) 10^x),
                         labels=trans_format('log10', function(x) round(10^x,1)),
+                         limits=limits,
                         guide = guide_colourbar(title.position = "left",
                       barwidth=0.5,barheight=10,ticks=TRUE,
                           nbin = 10))+
-  labs(subtitle="NPP-based Classical Depth Model")
+  labs(subtitle="NPP-based Classical Depth Model")+
+  theme( plot.subtitle = element_text(size = title_size),
+         text = element_text(size = text_size))
 
 ldg2_npp<- npp.clim1[, c("longitude","latitude","m2")] |> 
   mutate(total=m2) |>
@@ -584,9 +610,13 @@ ldg2_npp<- npp.clim1[, c("longitude","latitude","m2")] |>
                         trans="log10",
                         breaks=trans_breaks('log10', function(x) 10^x),
                         labels=trans_format('log10', function(x) round(10^x,4)),
+                         limits=limits,
                         guide = guide_colourbar(title.position = "left",
                       barwidth=0.5,barheight=10,ticks=TRUE,
-                          nbin = 10))
+                          nbin = 10))+
+  theme( plot.subtitle = element_text(size = title_size),
+         text = element_text(size = text_size))
+
 ldg3_npp<- npp.clim1[, c("longitude","latitude","m3")] |> 
   mutate(total=m3) |>
   select(-m3) |> 
@@ -597,12 +627,17 @@ ldg3_npp<- npp.clim1[, c("longitude","latitude","m3")] |>
                         trans="log10",
                         breaks=trans_breaks('log10', function(x) 10^x),
                         labels=trans_format('log10', function(x) round(10^x,4)),
+                         limits=limits,
                         guide = guide_colourbar(title.position = "left",
                       barwidth=0.5,barheight=10,ticks=TRUE,
-                          nbin = 10))
+                          nbin = 10))+
+  theme( plot.subtitle = element_text(size = title_size),
+         text = element_text(size = text_size))
 
-patch2_npp= map2_npp+theme(legend.position="none")+ldg2_npp+plot_layout(widths=c(3,1.))
-patch3_npp= map3_npp+theme(legend.position="none")+ldg3_npp+plot_layout(widths=c(3,1.))
+patch2_npp= map2_npp+theme(legend.position="none")+
+  ldg2_npp+theme(legend.position="none")+plot_layout(widths=c(3,1.))
+patch3_npp= map3_npp+theme(legend.position="none")+
+  ldg3_npp+theme(legend.position="none")+plot_layout(widths=c(3,1.))
 
 rm(map2_npp,map3_npp, ldg2_npp,ldg3_npp)
 ```
@@ -612,22 +647,30 @@ map2_poc<- plot.map(poc.clim[,c("longitude","latitude","m2")])+
   labs(color=TeX(r'(\textbf{Zoop C $(g \cdot m^{-2})$})'))+
   scale_color_gradientn(colours = my.colors,
                         trans="log10",
-                        breaks=trans_breaks('log10', function(x) 10^x),
+       breaks=trans_breaks('log10', function(x) 10^x),
                         labels=trans_format('log10', function(x) round(10^x,1)),
+                         limits=limits,
                         guide = guide_colourbar(title.position = "left",
                       barwidth=0.5,barheight=10,ticks=TRUE,
                           nbin = 10))+
-  labs(title="POC-based Variable Depth Model")
+  labs(subtitle="POC-based Variable Depth Model")+
+  theme( plot.subtitle = element_text(size = title_size),
+         text = element_text(size = text_size))
+
 map3_poc<- plot.map(poc.clim[,c("longitude","latitude","m3")])+
   labs(color=TeX(r'(\textbf{Zoop C $(g \cdot m^{-2})$})'))+
   scale_color_gradientn(colours = my.colors,
                         trans="log10",
-                        breaks=trans_breaks('log10', function(x) 10^x),
+    breaks=trans_breaks('log10', function(x) 10^x),
                         labels=trans_format('log10', function(x) round(10^x,1)),
+                         limits=limits,
                         guide = guide_colourbar(title.position = "left",
                       barwidth=0.5,barheight=10,ticks=TRUE,
                           nbin = 10))+
-  labs(title="POC-based Classical Depth Model")
+  labs(subtitle="POC-based Classical Depth Model")+
+  theme( plot.subtitle = element_text(size = title_size),
+         text = element_text(size = text_size))
+
 
 # latitudinal gradient
 ldg2_poc<- poc.clim[, c("longitude","latitude","m2")] |> mutate(total=m2) |>
@@ -637,11 +680,14 @@ ldg2_poc<- poc.clim[, c("longitude","latitude","m2")] |> mutate(total=m2) |>
   labs(x="Latitude (cell midpoint)",color=TeX(r'(\textbf{Zoop C $(g \cdot m^{-2})$})'),y="")+
   scale_color_gradientn(colours = my.colors,
                         trans="log10",
-                        breaks=trans_breaks('log10', function(x) 10^x),
-                        labels=trans_format('log10', function(x) round(10^x,1)),
+    breaks=trans_breaks('log10', function(x) 10^x),
+                        labels=trans_format('log10', function(x) round(10^x,4)),
+                         limits=limits,
                         guide = guide_colourbar(title.position = "left",
                       barwidth=0.5,barheight=10,ticks=TRUE,
-                          nbin = 10))
+                          nbin = 10))+
+  theme( plot.subtitle = element_text(size = title_size),
+         text = element_text(size = text_size))
 
 ldg3_poc<- poc.clim[, c("longitude","latitude","m3")] |> mutate(total=m3) |>
   select(-m3) |> 
@@ -650,29 +696,33 @@ ldg3_poc<- poc.clim[, c("longitude","latitude","m3")] |> mutate(total=m3) |>
   labs(x="Latitude (cell midpoint)",color=TeX(r'(\textbf{Zoop C $(g \cdot m^{-2})$})'),y="")+
   scale_color_gradientn(colours = my.colors,
                         trans="log10",
-                        breaks=trans_breaks('log10', function(x) 10^x),
-                        labels=trans_format('log10', function(x) round(10^x,1)),
+    breaks=trans_breaks('log10', function(x) 10^x),
+                        labels=trans_format('log10', function(x) round(10^x,4)),
+                         limits=limits,
                         guide = guide_colourbar(title.position = "left",
                       barwidth=0.5,barheight=10,ticks=TRUE,
-                          nbin = 10))
+                          nbin = 10))+
+  theme( plot.subtitle = element_text(size = title_size),
+         text = element_text(size = text_size))
 
-patch2_poc= map2_poc+theme(legend.position="none")+ldg2_poc+plot_layout(widths=c(3,1))
-patch3_poc= map3_poc+theme(legend.position="none")+ldg3_poc+plot_layout(widths=c(3,1))
+patch2_poc= map2_poc+theme(legend.position="none")+ldg2_poc+plot_layout(widths=c(3,1.))
+patch3_poc= map3_poc+theme(legend.position="none")+ldg3_poc+plot_layout(widths=c(3,1.))
 
 #remove not needed parts
 rm(map2_poc,map3_poc, ldg2_poc,ldg3_poc)
 ```
 
-```{r Fig2,fig.height=8, fig.width=17, message=FALSE, warning=FALSE}
+```{r Fig2+,fig.height=8, fig.width=18, message=FALSE, warning=FALSE}
 patch1<- patch2_npp / patch3_npp  
 patch2<- patch2_poc / patch3_poc
 
 (patch1 | patch2) + 
   plot_layout(heights = 1) +  
-  plot_annotation(tag_levels = c('A',"","B","","C","","D")) & 
-  theme(plot.tag = element_text("Times New Roman",face = "bold", size = 12,hjust = -3, vjust = 0))
+  plot_annotation(tag_levels = c('A')) & 
+  theme(plot.tag = element_text("Times New Roman",face = "bold", size = 20,hjust = -3, vjust = 0))
 
-ggsave("img/Fig.2_biomas-plots-climatology.png", width=22, height=10, units="in", dpi=300)
+
+ggsave("img/Fig.2_biomas-plots-climatology.png", width=17, height=8, units="in", dpi=300)
 ```
 
 
@@ -680,13 +730,16 @@ ggsave("img/Fig.2_biomas-plots-climatology.png", width=22, height=10, units="in"
 
 # 6. Diversity vs Biomass Based on POC m2
 
-
+```{r}
+text_size=14
+title_size=16
+```
 ```{r message=FALSE, warning=FALSE}
 #saveRDS(diver_biom, file="diver_biom.rds")
 rm(max.sp_lat,tot_rar,avr_rar,sp)
 ```
 
-```{r FigS1,fig.height=8, fig.width=10, warning=FALSE}
+```{r FigS1+,fig.height=8, fig.width=10, warning=FALSE}
 library(ggnewscale)
 mesopel_labels_prov <- read_csv("data/mesopel_labels_prov.csv")
 # Create an sf object from the data frame
@@ -740,15 +793,13 @@ ggsave("img/Fig.S1_biomas-plots-ProvId_Biomass.png", width=10, height=8, units="
 
 
 
-```{r}
+
+
+```{r FigS3+,fig.height=5, fig.width=12, warning=FALSE}
 ## 2D Biom vs SR + LDG
 dt2D <- diver_biom[,c("longitude","latitude","m2_poc","SR")] |> drop_na()
 
 SRBio_2D<- plot.map2D(dt2D |> select(longitude,latitude, total=SR, sum=m2_poc), dim=4,  xlab = "Biomass",ylab = "potential SR")
-```
-
-```{r Fig4,fig.height=5, fig.width=12, warning=FALSE}
-
 # ===> means show teh same pattern
 ldg<- diver_biom[,c("longitude","latitude","m2_poc","SR")] |> 
   group_by(latitude) |> 
@@ -782,20 +833,22 @@ ldg.plt<-ldg |> ggplot(aes(x=latitude))+
                               labels=c("66.5°S","23.5°S","0","23.5°N","66.5°N"),
                               limits=c(-80,90) )+
   
-  coord_flip()
+  coord_flip()+
+  theme( plot.title = element_text(size = title_size),
+         text = element_text(size = text_size))
 
 SRBio_2D + ldg.plt+  
-  plot_layout(widths =  c(3.5, 1))+ 
+  plot_layout(widths =  c(4, 1))+ 
   plot_annotation(tag_levels = 'A') & 
-  theme(plot.tag = element_text("Times New Roman",face = "bold", size = 12))
+  theme(plot.tag = element_text("Times New Roman",face = "bold", size = 16))
 
-ggsave("img/Fig.4_biomas-plots-Bio-SR-LDG.png", width=12, height=5, units="in", dpi=300)
+ggsave("img/Fig.S3_biomas-plots-Bio-SR-LDG.png", width=12, height=6, units="in", dpi=300)
 ```
 
 
 
 
-```{r Fig3, fig.height=5, fig.width=10, warning=FALSE}
+```{r Fig3+, fig.height=5, fig.width=10, warning=FALSE}
 ## Bio vs SR by POC
 diver_biom |> 
   arrange(POC) |> 
@@ -822,179 +875,125 @@ diver_biom |>
             legend.key.size= unit(0.2, "cm"),
             legend.spacing = unit(0, "cm"),
             legend.title = element_text(face="bold",angle = 90),
-        legend.title.align = 0.5)
+        legend.title.align = 0.5,
+        plot.title = element_text(size = 18),
+         text = element_text(size = 15))
 
 ggsave("img/Fig.3_biomas-plots-SR_Biomass_colorPOC.png", width=10, height=5, units="in", dpi=300)
 ```
 
+```{r FigS4, fig.height=12, fig.width=10, message=FALSE, warning=FALSE}
+title_size=16
+text_size=16
+# Define shared color scale limits and breaks
+color_limits <- range(SR_Biom_avrg$SR, SR_Biom$SR, SR_Biom_tot$SR, na.rm = TRUE)
+color_breaks <- c(0,10,30,50, 100, 200 ,300, 400, 500, 600)
 
-
-
-
-```{r Fig5, fig.height=12, fig.width=10, message=FALSE, warning=FALSE}
 # Biom vs Rarity
-p1<-rbind(SR_Biom_avrg ,SR_Biom|> select(-tot_rar)) |> mutate(
-  basin=factor(basin, levels=c("Global",
-                               unique(SR_Biom$basin)))) |>
-   arrange(avrg_rar)|> 
- ggplot(aes(x=avrg_rar, y=m2_poc, color=SR))+
- geom_point(alpha=0.5)+
- scale_x_log10(breaks = trans_breaks("log10", function(x) 10^x),
-              labels = trans_format("log10", math_format(10^.x))) +
- scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-              labels = trans_format("log10", math_format(10^.x))) +
- annotation_logticks() +
- geom_point()+
- facet_wrap(~basin, scales = "free_y",ncol =2)+
- theme_Publication()+
- panel_border()+
- geom_smooth(color="black",method = "loess", se=FALSE)+
- scale_color_gradientn(colours = my.colors,
-                        trans="sqrt",
-                        guide = guide_colourbar(
-                          title.position = "top",  barwidth=0.5,barheight=10,ticks=TRUE,
-                          nbin = 10))+
-  labs(y=TeX(r'(Zoop C $(g \cdot m^{-2})$)'), color="SR", x="Average range-size rarity")
-
-p2<- SR_Biom_tot |> mutate(basin="Total range-size rarity (Global)",
-  basin=as.factor(basin)) |> 
-  ggplot(aes(x=avrg_rar, y=m2_poc, color=SR))+
-  geom_point(alpha=0.5)+
-  scale_x_log10(breaks = trans_breaks("log10", function(x) 10^x),
-              labels = trans_format("log10", math_format(10^.x))) +
-     scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-              labels = trans_format("log10", math_format(10^.x))) +
-   annotation_logticks() +
-  geom_point()+
-  facet_wrap(~basin)+
-  theme_Publication()+
-  panel_border()+
-  geom_smooth(color="black",method = "loess", se=FALSE)+
-  scale_color_gradientn(colours = my.colors,
-                        trans="sqrt",
-                        guide = guide_colourbar(
-                          title.position = "top",  barwidth=0.5,barheight=10,ticks=TRUE,
-                          nbin = 10))+
-  labs(y=TeX(r'(Zoop C $(g \cdot m^{-2})$)'), color="SR", x="Total range-size rarity") 
-
-# combine plots
-p2  / p1 + 
-  plot_layout(heights = c(1, 3), guides = 'collect')+ 
-  plot_annotation(tag_levels = 'A')& 
-  theme(plot.tag = element_text("Times New Roman",face = "bold", size = 12,hjust = -3, vjust = 0))
-
-ggsave("img/Fig.5_biomas-plots-DiversityBiomass.png", width=10, height=15, units="in", dpi=300)
-```
-
-
-# 7. Cluster Bio+SR
-
-```{r FigS7,  warning=FALSE}
-library(factoextra)
-
-# Loading dataset
-df <- diver_biom |> mutate(m2_poc=log10(m2_poc)) |>  drop_na()
-
-# Scaling dataset
-df1 <- scale(df |> select(m2_poc, SR))
-
-# Run the function to see how many clusters
-km10 <- kmeans(df1, centers = 10, nstart = 25)
-
-# Visualize the clusters
-fviz_cluster(km10, data = df1,labelsize = 0)+
-  scale_color_manual(values=as.vector(rcartocolor::carto_pal(12, "Safe")))+
-  theme_Publication()+
-  labs(x="Biomass (log10)", y="SR")
-
-ggsave("img/Fig.7_clusters_plot.png", width=5, height=5, units="in", dpi=300)
-```
-
-
-```{r}
-## Proud et al. Map
-shp <- raster::shapefile("shp/Proud_provinces_shapefle/mesobio2/mesobio.shp")
-shp <- spTransform(shp, CRS('+proj=longlat +datum=WGS84'))
-
-## Set up a raster "template" for a 1 degree grid
-ext <- extent(shp)
-gridsize <- 1
-r <- raster(ext, res=gridsize)
-## Rasterize the shapefile
-rr <- rasterize(shp, r)
-#plot(rr)
-
-df.proud<-cbind(coordinates(rr),as.data.frame(rr))
-# put all the coordinates on a grid
-closest_RANN <- RANN::nn2(query  = df.proud[, 1:2], 
-                          data = grid[, 1:2],
-                          k = 1)
-proud.gridded <- cbind(df.proud, grid[closest_RANN$nn.idx,1:2 ]) |> 
-  select(-x, -y) |> 
-  mutate(bio_mg_m3=id) 
-proud.gridded
-rm(shp, df.proud,rr)
-```
-
-```{r Fig7, fig.height=3, fig.width=10}
-plot_grid(
-proud.gridded |> 
-  select(longitude, latitude, id) |> 
-  drop_na() |> 
-  mutate(id=factor(id))|> 
-  plot.map(continious=FALSE, alpha=1)+
-  scale_color_manual(values=as.vector(rcartocolor::carto_pal(12, "Safe")))+
-  labs(color="Cluster")+ 
-    guides(colour = guide_legend(title.position = "left")) + 
-  theme(legend.position = "none"),
-
-df |> mutate(cluster= as.factor(km10$cluster)) |> 
-  select(longitude, latitude, cluster)|> plot.map(continious=FALSE, alpha=1)+
-  scale_color_manual(values=as.vector(rcartocolor::carto_pal(12, "Safe")))+
-  labs(color="Cluster") + 
-    guides(colour = guide_legend(title.position = "left")) + 
-  theme(legend.position = "none"),
-
-labels="AUTO", ncol = 2
-)
-
-ggsave("img/Fig.7_clusters_Proud_vs_ThisWork.png", width=10, height=3, units="in", dpi=300)
-
-```
-
-
-
-
-
-
-# 8. Surface vs Deep biomass
-
-## Mediterenian Sea
-
-```{r FigS3,fig.height=5, fig.width=10, warning=FALSE}
-library(maps)
-library(metR)
-mediter<- diver_biom |>  filter(longitude <80, longitude >-5, latitude >25,latitude<44)
-world_map <- map_data("world")|>  filter(long <40, long>-10, lat >28,lat<47)
-
-medi.plt<- ggplot(world_map, aes(x = long, y = lat, group = group)) +
-  geom_tile(data = mediter, aes(longitude,latitude,fill = m2_poc,group = 1)) +  
-  geom_polygon(fill = "lightgray", colour = "black") +
-  scale_fill_gradientn(colours = my.colors,
-                        trans="log10",
-                        guide = guide_colourbar(barwidth = 0.5,barheight = 10,ticks = TRUE,nbin = 10)) +
- #scale_color_continuous(trans = 'log10')+
+# Plot 1
+p1 <- rbind(SR_Biom_avrg, SR_Biom %>% select(-tot_rar)) %>%
+  mutate(
+    basin = factor(basin, levels = c("Global", unique(SR_Biom$basin)))
+  ) %>%
+  arrange(avrg_rar) %>%
+  ggplot(aes(x = avrg_rar, y = m2_poc, color = SR)) +
+  geom_point(alpha = 0.5) +
+  scale_x_log10(
+    breaks = trans_breaks("log10", function(x) 10^x),
+    labels = trans_format("log10", math_format(10^.x))
+  ) +
+  scale_y_log10(
+    breaks = trans_breaks("log10", function(x) 10^x),
+    labels = trans_format("log10", math_format(10^.x))
+  ) +
+  annotation_logticks() +
+  geom_point() +
+  facet_wrap(~basin, scales = "free_y", ncol = 2) +
   theme_Publication() +
-  coord_equal() +
-  scale_x_longitude(ticks = 10) +
-  scale_y_latitude(ticks = 5)+
-  labs(fill = TeX(r'($log_{10}Bio$)'),x="",y="") 
-medi.plt
-ggsave("img/Fig.S3_biomas-plots-mediterenian.png", width=18, height=7, units="cm", dpi=300)
+  panel_border() +
+  geom_smooth(color = "black", method = "loess", se = FALSE) +
+  scale_color_gradientn(
+    colours = my.colors,
+    trans = "sqrt",
+    limits = color_limits,
+    breaks = color_breaks,
+    guide = guide_colourbar(
+      title.position = "top", barwidth = 0.5, barheight = 10, ticks = TRUE, nbin = 10
+    )
+  ) +
+  labs(
+    y = TeX(r'(Zoop C $(g \cdot m^{-2})$)'),
+    color = "SR",
+    x = "Average range-size rarity"
+  ) +
+  theme(
+    plot.title = element_text(size = title_size),
+    strip.text = element_text(size = title_size),
+    text = element_text(size = text_size)
+  )
+
+# Plot 2
+p2 <- SR_Biom_tot %>%
+  mutate(
+    basin = "Total range-size rarity (Global)",
+    basin = as.factor(basin)
+  ) %>%
+  ggplot(aes(x = avrg_rar, y = m2_poc, color = SR)) +
+  geom_point(alpha = 0.5) +
+  scale_x_log10(
+    breaks = trans_breaks("log10", function(x) 10^x),
+    labels = trans_format("log10", math_format(10^.x))
+  ) +
+  scale_y_log10(
+    breaks = trans_breaks("log10", function(x) 10^x),
+    labels = trans_format("log10", math_format(10^.x))
+  ) +
+  annotation_logticks() +
+  geom_point() +
+  facet_wrap(~basin) +
+  theme_Publication() +
+  panel_border() +
+  geom_smooth(color = "black", method = "loess", se = FALSE) +
+  scale_color_gradientn(
+    colours = my.colors,
+    trans = "sqrt",
+    limits = color_limits,
+    breaks = color_breaks,
+    guide = guide_colourbar(
+      title.position = "top", barwidth = 0.5, barheight = 10, ticks = TRUE, nbin = 10
+    )
+  ) +
+  labs(
+    y = TeX(r'(Zoop C $(g \cdot m^{-2})$)'),
+    color = "SR",
+    x = "Total range-size rarity"
+  ) +
+  theme(
+    plot.title = element_text(size = title_size),
+    strip.text = element_text(size = title_size),
+    text = element_text(size = text_size)
+  )
+
+# Combine plots with a shared legend and adjust layout
+fig <- p2 / p1 +
+  plot_layout(heights = c(1, 3), guides = "collect") +
+  plot_annotation(tag_levels = "A") &
+  theme(
+    plot.tag = element_text("Times New Roman", face = "bold", size = 16, hjust = -3, vjust = 0))
+
+ggsave("img/Fig.S4_biomas-plots-DiversityBiomass.png", plot=fig, width=10, height=15, units="in", dpi=300)
+
+fig
 ```
+
+# 7. Surface vs Deep biomass
 
 ## Stromberg et al (2009)
+```{r}
 
+text_size=16
+title_size=18
+```
 Strömberg, Smyth, Allen, Pitois,  O'Brien,2009,Estimation of global zooplankton biomass from satellite ocean colour,
 Journal of Marine Systems,Volume 78, Issue 1,pp 18-27,ISSN 0924-7963,https://doi.org/10.1016/j.jmarsys.2009.02.004.
 (https://www.sciencedirect.com/science/article/pii/S0924796309000669)
@@ -1027,7 +1026,9 @@ p1<-obrien.gridded|>
                         labels=trans_format('log10', function(x) round(10^x,1)),
                         guide = guide_colourbar(title.position = "left",
                       barwidth=0.5,barheight=10,ticks=TRUE,
-                          nbin = 10))
+                          nbin = 10))+
+  theme(plot.title = element_text(size = title_size),
+         text = element_text(size = text_size))
 ###for meso 200-1000
 obrien.dt<- right_join(diver_biom |> select(latitude, longitude, m3_poc),
                    obrien.gridded |> select(latitude, longitude, bio_mgC_m3),
@@ -1038,7 +1039,9 @@ obrien.dt<- right_join(diver_biom |> select(latitude, longitude, m3_poc),
 p2<- obrien.dt|> 
   drop_na(m3_poc, bio_mgC_m3)|> 
   select(longitude, latitude, total=bio_mgC_m3, sum=m3_poc)|> 
-  plot.map2D( dim=4,  ylab = "meso", xlab = "epi",pal= "BlueYl")
+  plot.map2D( dim=4,  ylab = "meso", xlab = "epi",pal= "BlueYl")+
+  theme(plot.title = element_text(size = title_size),
+         text = element_text(size = text_size))
 
 p3<-obrien.dt|> drop_na(ratio_epi_meso) |> 
   select(longitude, latitude,total=ratio_epi_meso)|> 
@@ -1056,7 +1059,9 @@ p3<-obrien.dt|> drop_na(ratio_epi_meso) |>
             legend.spacing = unit(0, "cm"),
             legend.title = element_text(face="bold",angle = 90),
         legend.title.align = 0.5)+
-  labs(color="Epi:Meso Biomas Ratio")
+  labs(color="Epi:Meso Biomas Ratio")+
+  theme(plot.title = element_text(size = title_size),
+         text = element_text(size = text_size))
   
 patch_stromberg <- p1 /p3 / p2 + plot_layout(heights=c(1,1,1.1))
 patch_stromberg
@@ -1071,7 +1076,7 @@ psych::describe(obrien.dt$ratio_epi_meso,quant=c(.25,.75) )
 ## Bogorov et al (1968)
 
 Bogorov, V.G., Vinogradov, M.D., Varonina, N.M., Kanaeva, I.P., and Suetova, I.A. 1968. Distribution of zooplankton biomass within the surficial layer of the world ocean. Dokl. Akad. Nauk. USSR, 182: 1205-1207
-```{r FigS2,fig.height=4, fig.width=8}
+```{r FigS2+,fig.height=4, fig.width=8}
 # Bogorov, V.G., Vinogradov, M.D., Varonina, N.M., Kanaeva, I.P., and Suetova, I.A. 1968. Distribution of zooplankton biomass within the surficial layer of the world ocean. Dokl. Akad. Nauk. USSR, 182: 1205-1207
 nc <-   st_read(here::here("shp/V3_BIOMAS_VALUE_SHAPFILE/BIOMAS_VALUE.shp")) |>
   filter(bio_mg_m3 !="boundary line") |> 
@@ -1129,17 +1134,30 @@ bogrov.gridded <- cbind(df.bogrov, grid[closest_RANN$nn.idx,1:2 ]) |>
 rm(shp, df.bogrov,rr)
 
 #200-1000 m
- p1<- bogrov.gridded |> select(longitude, latitude,bio_original) |> 
-  plot.map(continious=FALSE, alpha=1) +
-  scale_color_manual(values = c("#313695","#74add1","#fee090","#fdae61","#f46d43","#a50026"))+ 
-  guides(color = guide_legend(title = TeX(r'(\textbf{Biomass $(mg \cdot m^{-3})$})'), 
-                              title.position = "left"))+
-  theme(legend.position = "right",
-            legend.key.size= unit(0.2, "cm"),
-            legend.spacing = unit(0, "cm"),
-            legend.title = element_text(face="bold",angle = 90),
-        legend.title.align = 0)+
-  labs(title="Bogorov et al (1968)")
+p1 <- bogrov.gridded |> 
+    select(longitude, latitude, bio_original) |> 
+    plot.map(continious = FALSE, alpha = 1) +
+    scale_color_manual(
+        values = c("#313695", "#74add1", "#fee090", "#fdae61", "#f46d43", "#a50026"),
+        guide = guide_legend(
+            title = TeX(r'(\textbf{Biomass $(mg \cdot m^{-3})$})'),
+            title.position = "left",
+            override.aes = list(shape = 15, size = 6) # Set legend items to squares
+        )
+    ) +
+    theme(
+        legend.position = "right",
+        legend.key.size = unit(0.4, "cm"),
+        legend.spacing = unit(0, "cm"),
+        legend.title = element_text(face = "bold", angle = 90),
+        legend.title.align = 0
+    ) +
+    labs(title = "Bogorov et al (1968)") +
+    theme(
+        plot.title = element_text(size = title_size),
+        text = element_text(size = text_size)
+    )
+
 
 
 bogrov.dt<- right_join(diver_biom |> select(latitude, longitude, m3_poc),
@@ -1149,7 +1167,9 @@ bogrov.dt<- right_join(diver_biom |> select(latitude, longitude, m3_poc),
 
 p2<-bogrov.dt|> drop_na(m3_poc, bio_mg_m3) |> 
   select(longitude, latitude,total=bio_mg_m3, sum=m3_poc) |> 
-  plot.map2D(dim=4,  ylab = "meso", xlab = "epi",pal= "BlueYl")
+  plot.map2D(dim=4,  ylab = "meso", xlab = "epi",pal= "BlueYl")+
+  theme(plot.title = element_text(size = title_size),
+         text = element_text(size = text_size))
 
 p3<- bogrov.dt|>  
   select(longitude, latitude,ratio_epi_meso)|> 
@@ -1167,7 +1187,9 @@ p3<- bogrov.dt|>
             legend.spacing = unit(0, "cm"),
             legend.title = element_text(face="bold",angle = 90),
         legend.title.align = 0.5)+
-  labs(color="Epi:Meso Biomas Ratio")
+  labs(color="Epi:Meso Biomas Ratio")+
+  theme(plot.title = element_text(size = title_size),
+         text = element_text(size = text_size))
   
 bogorov <- p1 /p3 / p2 + plot_layout(heights=c(1,1,1.1))
 bogorov
@@ -1182,14 +1204,14 @@ psych::describe(bogrov.dt$ratio_epi_meso,quant=c(.25,.75) )
 
 
 
-```{r Fig6, fig.height=10, fig.width=16, message=FALSE, warning=FALSE}
+```{r Fig4+, fig.height=10, fig.width=16, message=FALSE, warning=FALSE}
 ### combine Stromberg & Bogrov maps
 (patch_stromberg | bogorov) + 
   plot_layout(heights = 1) +  
   plot_annotation(tag_levels =  c('A', '1')) & 
-  theme(plot.tag = element_text("Times New Roman",face = "bold", size = 12,hjust = -3, vjust = 0))
+  theme(plot.tag = element_text("Times New Roman",face = "bold", size = 16,hjust = -3, vjust = 0))
 
-ggsave("img/Fig.6_biomas-plots-StrombergBogrov_200-1000.png", width=16, height=10, units="in", dpi=300)
+ggsave("img/Fig.4_biomas-plots-StrombergBogrov_200-1000.png", width=16, height=10, units="in", dpi=300)
 ```
 
 
