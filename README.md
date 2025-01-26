@@ -11,13 +11,14 @@ This repository contains the code and data used for the analysis and visualizati
   - `META_zoop.csv`: Metadata for zooplankton.
   - `ENSEMBLE_occ.wmean.tot.csv`: Total species occurrence data.
   - `ENV.RData`: Environmental variables data for mesopelagic zone.
-  - `total-range-size-rarity-FILTERED.csv`- total rarity
-  - `avrg-size-rarity-FILTERED.csv` - sversge rsnge-size rarity
+  - `total-range-size-rarity-FILTERED.csv`- total range-size rarity
+  - `avrg-size-rarity-FILTERED.csv` - aversge rsnge-size rarity
   - `mesopel_labels_prov.csv` - mesoplegaic provinces names
   - `grid.csv` - contains data on upper and lower depth of mesopleagic boundary
+  - zooplankton biomass from the Malaspina cruise was downloaded from [https://doi.org/10.1594/PANGAEA.922974](https://doi.org/10.1594/PANGAEA.922974) 
 
 #### Scripts📜
-- **scripts/**
+- **functions/**
   - `fun/theme_Publication.R`: Custom theme for publication-quality plots.
   
 #### Notebooks📒
